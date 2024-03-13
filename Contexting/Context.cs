@@ -62,6 +62,8 @@ namespace Contexting
             var exits = existents.GetMappeds(mapped.Exits.All.ToArray());
             foreach (var exit in exits)
                 destinations.Add(exit);
+
+            destinations.Add(mapped);
         }
 
         private IEnumerable<A> extractOthers(M mapped, Existents<A, I, M> existents)
