@@ -20,15 +20,16 @@ namespace Contexting
 
         public A Main { get; }
 
-        public IEnumerable<IIdentifiable> Destinations => destinations;
-        public IEnumerable<IIdentifiable> Others => others;
-        public IEnumerable<IIdentifiable> Items => items;
+        public ISet<IIdentifiable> Destinations => destinations;
+        public ISet<IIdentifiable> Others => others;
+        public ISet<IIdentifiable> Items => items;
 
-        public IEnumerable<IIdentifiable> All =>
+        public ISet<IIdentifiable> All =>
             new HashSet<IIdentifiable>()
                 .Union(destinations)
                 .Union(others)
-                .Union(items);
+                .Union(items)
+                .ToHashSet();
 
         public Context(A main, Existents<A, I, M> existents)
         {
