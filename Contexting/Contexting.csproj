@@ -12,7 +12,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/ivsaez/Contexting</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Version>1.1.4</Version>
+    <Version>1.1.5</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,9 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="isz-AgentBody" Version="1.2.0" />
-    <PackageReference Include="isz-Instanciation" Version="1.5.2" />
-    <PackageReference Include="isz-Wearing" Version="2.4.2" />
+    <PackageReference Include="isz-AgentBody" Version="1.2.1" />
+    <PackageReference Include="isz-Instanciation" Version="1.5.3" />
+    <PackageReference Include="isz-Wearing" Version="2.4.3" />
   </ItemGroup>
 
 </Project>
