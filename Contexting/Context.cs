@@ -96,7 +96,7 @@ namespace Contexting
 
         private void extractItems(M mapped, Existents<A, I, M> existents)
         {
-            var items = mapped.Items.AllObservables(existents.ItemsRepository);
+            var items = mapped.Items.AllAccessible(existents.ItemsRepository);
             foreach (var item in items)
                 this.items.Add(item);
         }
