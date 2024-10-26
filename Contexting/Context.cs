@@ -15,65 +15,89 @@ namespace Contexting
         where M : IMapped, ISavable, ICloneable
     {
         private readonly HashSet<IIdentifiable> destinations;
-        private readonly HashSet<IIdentifiable> others;
+        private readonly HashSet<IIdentifiable> agents;
         private readonly HashSet<IIdentifiable> items;
 
-        public A Main { get; }
+        public A? Main { get; }
+        public M? Mapped { get; }
 
         public ISet<IIdentifiable> Destinations => destinations;
-        public ISet<IIdentifiable> Others => others;
+        public ISet<IIdentifiable> Agents => agents;
         public ISet<IIdentifiable> Items => items;
 
         public ISet<IIdentifiable> All =>
             new HashSet<IIdentifiable>()
                 .Union(destinations)
-                .Union(others)
+                .Union(agents)
                 .Union(items)
                 .ToHashSet();
 
-        public Context(A main, Existents<A, I, M> existents)
+        public static Context<A, I, M> FromAgent(A main, Existents<A, I, M> existents) =>
+            new Context<A, I, M>(main, default(M), existents);
+
+        public static Context<A, I, M> FromPlace(M mapped, Existents<A, I, M> existents) =>
+            new Context<A, I, M>(default(A), mapped, existents);
+
+        public void Add(Context<A, I, M> context)
         {
-            Main = main;
+            foreach (var mapped in context.destinations)
+                destinations.Add(mapped);
 
-            destinations = new HashSet<IIdentifiable>();
-            others = new HashSet<IIdentifiable>();
-            items = new HashSet<IIdentifiable>();
+            foreach (var agent in context.agents)
+                agents.Add(agent);
 
-            buildContext(existents);
+            foreach (var item in context.items)
+                items.Add(item);
         }
 
-        private void buildContext(Existents<A, I, M> existents)
+        private Context(A? main, M? mapped, Existents<A, I, M> existents)
         {
-            var mapped = existents.GetUbication(Main);
+            destinations = new HashSet<IIdentifiable>();
+            agents = new HashSet<IIdentifiable>();
+            items = new HashSet<IIdentifiable>();
 
-            extractDestinations(mapped, existents);
+            Main = main;
+            Mapped = mapped is null
+                ? Main is not null
+                    ? existents.GetUbication(Main)
+                    : default(M)
+                : mapped;
 
-            var others = extractOthers(mapped, existents);
+            buildFocusedContext(existents);
+        }
+
+        private void buildFocusedContext(Existents<A, I, M> existents)
+        {
+            extractDestinations(existents);
+
+            var others = extractAgents(existents);
             extractOthersCarried(others, existents);
             extractOthersWear(others, existents);
 
-            extractItems(mapped, existents);
+            extractItems(existents);
 
             extractMainItems(existents);
         }
 
-        private void extractDestinations(M mapped, Existents<A, I, M> existents)
+        private void extractDestinations(Existents<A, I, M> existents)
         {
-            var exits = existents.GetMappeds(mapped.Exits.All.ToArray());
+            var exits = existents.GetMappeds(Mapped!.Exits.All.ToArray());
             foreach (var exit in exits)
                 destinations.Add(exit);
 
-            destinations.Add(mapped);
+            destinations.Add(Mapped);
         }
 
-        private IEnumerable<A> extractOthers(M mapped, Existents<A, I, M> existents)
+        private IEnumerable<A> extractAgents(Existents<A, I, M> existents)
         {
-            var others = existents.GetAgents(mapped.Agents.OthersThan(Main).ToArray());
+            var agents = Main is null
+                ? existents.GetAgents(Mapped!.Agents.All.ToArray())
+                : existents.GetAgents(Mapped!.Agents.OthersThan(Main).ToArray());
 
-            foreach (var other in others)
-                this.others.Add(other);
+            foreach (var agent in agents)
+                this.agents.Add(agent);
 
-            return others;
+            return agents;
         }
 
         private void extractOthersCarried(IEnumerable<A> others, Existents<A, I, M> existents)
@@ -94,18 +118,20 @@ namespace Contexting
             }
         }
 
-        private void extractItems(M mapped, Existents<A, I, M> existents)
+        private void extractItems(Existents<A, I, M> existents)
         {
-            var items = mapped.Items.AllAccessible(existents.ItemsRepository);
+            var items = Mapped!.Items.AllAccessible(existents.ItemsRepository);
             foreach (var item in items)
                 this.items.Add(item);
         }
 
         private void extractMainItems(Existents<A, I, M> existents)
         {
-            extractCarriedMainItems(existents);
-
-            extractWearedMainItems(existents);
+            if(Main is not null)
+            {
+                extractCarriedMainItems(existents);
+                extractWearedMainItems(existents);
+            }
         }
 
         private void extractCarriedMainItems(Existents<A, I, M> existents)
